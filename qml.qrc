@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>nn_sandbox/frontend/main.qml</file>
+        <file>nn_sandbox/frontend/components/DataChart.qml</file>
+        <file>nn_sandbox/frontend/components/DoubleSpinBox.qml</file>
+        <file>nn_sandbox/frontend/components/ExecutionControls.qml</file>
+        <file>nn_sandbox/frontend/components/NetworkSetting.qml</file>
+        <file>nn_sandbox/frontend/components/NoteBook.qml</file>
+        <file>nn_sandbox/frontend/components/Page.qml</file>
+        <file>nn_sandbox/frontend/components/RateChart.qml</file>
+        <file>nn_sandbox/frontend/components/dashboards/Som.qml</file>
+        <file>nn_sandbox/assets/images/baseline-check_circle-24px.svg</file>
+        <file>nn_sandbox/assets/images/baseline-play_arrow-24px.svg</file>
+        <file>nn_sandbox/assets/images/baseline-stop-24px.svg</file>
+    </qresource>
+</RCC>
