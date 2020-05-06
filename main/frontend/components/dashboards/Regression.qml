@@ -12,24 +12,15 @@ Page {
     name: 'Regression'
     ColumnLayout {
         GroupBox {
-            id: groupBox
+            id: dataBox
             title: 'Data'
             Layout.fillWidth: true
             GridLayout {
                 anchors.fill: parent
                 columns: 2
-                Label {
-                    text: 'Insert data'
-                    Layout.alignment: Qt.AlignHCenter
-                }
                 Button {
-                    text: "Ok"
+                    text: "Choose File"
                     onClicked: fileDialog.open()
-                }
-                Label {
-                    id: fileLabel
-                    text: r_manager.coeff
-                    Layout.alignment: Qt.AlignHCenter
                 }
                 FileDialog {
                     id: fileDialog
@@ -46,170 +37,38 @@ Page {
                     }
                     Component.onCompleted: visible = false
                 }
-            }
-        }
-        GroupBox {
-            id: groupBox2
-            title: 'Data'
-            Layout.fillWidth: true
-            GridLayout {
-                anchors.fill: parent
-                columns: 2
-                Label {
-                    id: regLabel
-                    text: 'Insert data'
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                RoundButton {
-                    id: startButton2
-                    icon.source: '../../../assets/images/baseline-play_arrow-24px.svg'
-                    radius: 0
-                    ToolTip.visible: hovered
-                    ToolTip.text: 'Start Training'
-                    onClicked: () => {
-                        r_manager.predictions_plot()
-                    }
-                }
-                Label {
-                    text: r_manager.coeff
-                    Layout.alignment: Qt.AlignHCenter
+                Button {
+                    text: "Run Regression"
+                    onClicked: r_manager.get_df(table_model.get_data())
                 }
             }
         }
         GroupBox {
-            id: groupBox3
-            title: 'Regression summary'
+            id: regressionSettingsBox
+            title: 'Regression settings'
             Layout.fillWidth: true
             Layout.fillHeight: true
             GridLayout {
                 anchors.fill: parent
-                columns: 2
-                TableView {
-                    id: tableView
-
-                    columnWidthProvider: function (column) { return 100; }
-                    rowHeightProvider: function (column) { return 60; }
-                    anchors.fill: parent
-                    leftMargin: rowsHeader.implicitWidth
-                    topMargin: columnsHeader.implicitHeight
-                    model: table_model
-                    delegate: Rectangle {
-                        border.width: 1
-                        Text {
-                            text: display
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            color: 'black'
-                            font.pixelSize: 15
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                    }
-                    Rectangle { // mask the headers
-                        z: 3
-                        color: "#222222"
-                        y: tableView.contentY
-                        x: tableView.contentX
-                        width: tableView.leftMargin
-                        height: tableView.topMargin
-                    }
-
-                    Row {
-                        id: columnsHeader
-                        y: tableView.contentY
-                        z: 2
-                        Repeater {
-                            model: tableView.columns > 0 ? tableView.columns : 1
-                            Label {
-                                width: tableView.columnWidthProvider(modelData)
-                                height: 35
-                                text: table_model.headerData(modelData, Qt.Horizontal)
-                                color: '#aaaaaa'
-                                font.pixelSize: 15
-                                padding: 10
-                                verticalAlignment: Text.AlignVCenter
-
-                                background: Rectangle { color: "#333333" }
-                            }
-                        }
-                    }
-                    Column {
-                        id: rowsHeader
-                        x: tableView.contentX
-                        z: 2
-                        Repeater {
-                            model: tableView.rows > 0 ? tableView.rows : 1
-                            Label {
-                                width: 40
-                                height: tableView.rowHeightProvider(modelData)
-                                text: table_model.headerData(modelData, Qt.Vertical)
-                                color: '#aaaaaa'
-                                font.pixelSize: 15
-                                padding: 10
-                                verticalAlignment: Text.AlignVCenter
-
-                                background: Rectangle { color: "#333333" }
-                            }
-                        }
-                    }
-
-                    ScrollIndicator.horizontal: ScrollIndicator { }
-                    ScrollIndicator.vertical: ScrollIndicator { }
-                }
-                Text {
-                     id: mytext
-                     anchors.fill: parent
-                     textFormat: Text.RichText
-                     text: r_manager.summary
-                }
+                columns: 1
+                rows: 1
+                List {}
             }
         }
     }
     ColumnLayout {
         GroupBox {
-            id: groupBox4
-            title: 'Data'
+            id: resultBox
+            title: 'Result'
             Layout.fillWidth: true
             GridLayout {
                 anchors.fill: parent
                 columns: 2
-                Rectangle {
-                    Layout.alignment: Qt.AlignHCenter
-                    width: 200; height: 100
-
-                    DelegateModel {
-                        id: visualModel
-                        model: ListModel {
-                            ListElement { name: "Apple" }
-                            ListElement { name: "Orange" }
-                        }
-
-                        groups: [
-                            DelegateModelGroup { name: "selected" }
-                        ]
-
-                        delegate: Rectangle {
-                            id: item
-                            height: 25
-                            width: 200
-                            Text {
-                                text: {
-                                    var text = "Name: " + name
-                                    if (item.DelegateModel.inSelected)
-                                        text += " (" + item.DelegateModel.selectedIndex + ")"
-                                    return text;
-                                }
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: item.DelegateModel.inSelected = !item.DelegateModel.inSelected
-                            }
-                        }
-                    }
-
-                    ListView {
-                        anchors.fill: parent
-                        model: visualModel
-                    }
+                Text {
+                     id: resultText
+                     anchors.fill: parent
+                     textFormat: Text.RichText
+                     text: r_manager.summary
                 }
 
             }

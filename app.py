@@ -21,13 +21,12 @@ if __name__ == '__main__':
     # for name in backend:
     #     engine.rootContext().setContextProperty(name, backend[name])
 
-
-    df = pd.DataFrame(np.random.randint(0, 100, size=(6, 7)), columns=list('ABCDEFG'))
+    df = pd.DataFrame()
     model = DataFrameModel(df)
+    engine.rootContext().setContextProperty("table_model", model)
     manager = RegressionManager()
     engine.rootContext().setContextProperty("r_manager", manager)
-    engine.rootContext().setContextProperty("table_model", model)
-    #engine.load(PyQt5.QtCore.QUrl('qrc:/main/frontend/main.qml'))
+    # engine.load(PyQt5.QtCore.QUrl('qrc:/main/frontend/main.qml'))
     engine.load('./main/frontend/main.qml')
 
     if not engine.rootObjects():

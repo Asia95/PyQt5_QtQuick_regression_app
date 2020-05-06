@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 import PyQt5.QtCore
-#from . import DataFrameModel
 
 class RegressionManager(PyQt5.QtCore.QObject):
     coeffChanged = PyQt5.QtCore.pyqtSignal(float)
