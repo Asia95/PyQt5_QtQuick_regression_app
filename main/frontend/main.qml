@@ -20,6 +20,7 @@ ApplicationWindow {
         anchors.fill: parent
         NoteBook {
             Regression {}
+            List {}
         }
     }
 }

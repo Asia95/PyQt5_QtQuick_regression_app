@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 import PyQt5.QtCore
+#from . import DataFrameModel
 
 class RegressionManager(PyQt5.QtCore.QObject):
     coeffChanged = PyQt5.QtCore.pyqtSignal(float)
     filePathChanged = PyQt5.QtCore.pyqtSignal(str)
     summaryChanged = PyQt5.QtCore.pyqtSignal(str)
+    dfChanged = PyQt5.QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(RegressionManager, self).__init__(parent)
@@ -20,6 +22,8 @@ class RegressionManager(PyQt5.QtCore.QObject):
         self._model = None
         self._X = None
         self._y = None
+        self._columns = None
+        self._df = None
 
     @PyQt5.QtCore.pyqtProperty(float, notify=coeffChanged)
     def coeff(self):
@@ -41,7 +45,7 @@ class RegressionManager(PyQt5.QtCore.QObject):
             self._file_path = f
             self.filePathChanged.emit(f)
 
-    @PyQt5.QtCore.pyqtProperty(float, notify=summaryChanged)
+    @PyQt5.QtCore.pyqtProperty(str, notify=summaryChanged)
     def summary(self):
         return self._summary
 
@@ -49,19 +53,39 @@ class RegressionManager(PyQt5.QtCore.QObject):
     def summary(self, s):
         if self._summary != s:
             self._summary = s
-            self.filePathChanged.emit(s)
+            self.summaryChanged.emit(s)
+
+    @PyQt5.QtCore.pyqtProperty(str, notify=dfChanged)
+    def df(self):
+        return self._df
+
+    @df.setter
+    def df(self, c):
+        if self._df != c:
+            self._df = c
+            self.dfChanged.emit(c)
+
+    @PyQt5.QtCore.pyqtSlot('QString')
+    def get_df(self, df_csv):
+        self._df = pd.DataFrame([x.split(',') for x in df_csv.split('\r\n')[1:]],
+                           columns=[x for x in df_csv.split('\r\n')[0].split(',')])
+        self._df.set_index('id', inplace=True)
+        self._df = self._df[:-1]
+        print(self._df.to_string())
 
     @PyQt5.QtCore.pyqtSlot('QString')
     def load_data(self, fp):
-        self._file_path = fp
+        self.file_path = fp
         self._data = pd.read_csv(self._file_path)
+        #self.columns = list(self._data.columns.values)
         self._X = pd.DataFrame(self._data['x'])
         self._X = sm.add_constant(self._X)
         self._y = pd.DataFrame(self._data['y'])
-        print('jjj')
         #model = LinearRegression().fit(X, y)
         self._model = sm.OLS(self._y, self._X).fit()
-        print('lll')
+        results_as_html = self._model.summary().tables[1].as_html()
+        self.summary = results_as_html
+        #print(self._summary)
         #self.summary = self._model.summary()
         #self.coeff = model.intercept_[0]
 
@@ -78,3 +102,4 @@ class RegressionManager(PyQt5.QtCore.QObject):
         ax.plot(self._X, iv_l, 'r--')
         ax.legend(loc='best')
         fig.show()
+
