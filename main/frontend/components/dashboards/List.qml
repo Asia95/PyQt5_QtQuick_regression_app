@@ -1,8 +1,8 @@
 import QtQml 2.12
 import QtQuick 2.12
-import QtQuick.Controls 2.4
+import QtQuick.Controls 2.14
 
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.0
 import QtQml.Models 2.14
 import Qt.labs.qmlmodels 1.0
@@ -15,8 +15,7 @@ TableView {
 
     columnWidthProvider: function (column) { return 100; }
     rowHeightProvider: function (column) { return 40; }
-    anchors.fill: parent
-    leftMargin: rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrtCheckbox.implicitWidth + variableCombobox.implicitWidth
+    leftMargin: rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth
     topMargin: columnsHeader.implicitHeight
     model: table_model
     delegate: Item {
@@ -156,7 +155,7 @@ TableView {
         }
     }
     Column {
-        id: sqrtCheckbox
+        id: sqrCheckbox
         x: tableView.contentX + rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth
         z: 0
         Repeater {
@@ -167,7 +166,7 @@ TableView {
                 height: tableView.rowHeightProvider(modelData)
                 CheckBox {
                     id: check
-                    onCheckedChanged: table_model.sqrt_check(modelData)
+                    onCheckedChanged: table_model.sqr_check(modelData)
                 }
             }
 
@@ -175,7 +174,7 @@ TableView {
     }
     Column {
         id: variableCombobox
-        x: tableView.contentX + rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrtCheckbox.implicitWidth
+        x: tableView.contentX + rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth
         z: 0
         Repeater {
             model: tableView.rows > 0 ? tableView.rows : 1

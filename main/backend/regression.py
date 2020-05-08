@@ -70,20 +70,79 @@ class RegressionManager(PyQt5.QtCore.QObject):
                            columns=[x for x in df_csv.split('\r\n')[0].split(',')])
         self._df.set_index('id', inplace=True)
         self._df = self._df[:-1]
-        print(self._df.to_string())
+        d = {'True': True, 'False': False}
+        self._df.logarithm = self._df.logarithm.map(d)
+        self._df.sqr = self._df.sqr.map(d)
+
+    def check_regression_settings(self, dependent_variables, independent_variables):
+        log_var = []
+        sqr_var = []
+
+        if dependent_variables.empty:
+            return 'Please specify dependent variable'
+        elif len(dependent_variables.index) > 1:
+            return 'Only one variable can be dependent'
+        if independent_variables.empty:
+            return 'Please specify independent variable'
+
+        if not independent_variables[independent_variables.logarithm].empty:
+            log_var = independent_variables[independent_variables.logarithm]['Variables'].values
+
+        if not independent_variables[independent_variables.sqr].empty:
+            sqr_var = independent_variables[independent_variables.sqr]['Variables'].values
+
+        if any(x in log_var for x in sqr_var):
+            return 'Variables cannot have two effects applied'
+
+    @PyQt5.QtCore.pyqtSlot()
+    def run_regression(self):
+        dependent_variables = self._df[self._df['role'] == 'Dependent']
+        independent_variables = self._df[self._df['role'] == 'Independent']
+
+        msg = self.check_regression_settings(dependent_variables, independent_variables)
+
+        if not msg:
+            data_for_regression = self._data.copy()
+            log_var = []
+            sqr_var = []
+
+            if not independent_variables[independent_variables.logarithm].empty:
+                log_var = independent_variables[independent_variables.logarithm]['Variables'].values
+                for c in log_var:
+                    data_for_regression = data_for_regression[data_for_regression[c] > 0]
+                data_for_regression[log_var] = np.log(data_for_regression[log_var])
+
+            if not independent_variables[independent_variables.sqr].empty:
+                sqr_var = independent_variables[independent_variables.sqr]['Variables'].values
+                data_for_regression[sqr_var] = np.square(data_for_regression[sqr_var])
+
+            self._X = data_for_regression[independent_variables['Variables'].values]
+            for x in log_var:
+                self._X.rename(columns={x: f'log({x})'}, inplace=True)
+            for x in sqr_var:
+                self._X.rename(columns={x: f'square({x})'}, inplace=True)
+            self._X = sm.add_constant(self._X)
+            self._y = data_for_regression[dependent_variables['Variables'].values[0]]
+
+            self._model = sm.OLS(self._y, self._X).fit()
+            results_as_html = self._model.summary().as_text()
+            self.summary = results_as_html
+            data_for_regression = None
 
     @PyQt5.QtCore.pyqtSlot('QString')
     def load_data(self, fp):
         self.file_path = fp
         self._data = pd.read_csv(self._file_path)
         #self.columns = list(self._data.columns.values)
-        self._X = pd.DataFrame(self._data['x'])
-        self._X = sm.add_constant(self._X)
-        self._y = pd.DataFrame(self._data['y'])
+        #self._X = pd.DataFrame(self._data['x'])
+        #self._X = sm.add_constant(self._X)
+        #self._y = pd.DataFrame(self._data['y'])
         #model = LinearRegression().fit(X, y)
-        self._model = sm.OLS(self._y, self._X).fit()
-        results_as_html = self._model.summary().tables[1].as_html()
-        self.summary = results_as_html
+        #self._model = sm.OLS(self._y, self._X).fit()
+        #results_as_html = self._model.summary().as_text()
+        #results_as_html = results_as_html.replace("<table class=\"simpletable\">", "<table border = '1'>")
+        #print(results_as_html)
+        #self.summary = results_as_html
         #print(self._summary)
         #self.summary = self._model.summary()
         #self.coeff = model.intercept_[0]
