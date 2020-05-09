@@ -1,7 +1,0 @@
-pyvan==0.0.5
-numpy==1.18.3
-backports.statistics==0.1.0
-Cython==0.29.17
-ordereddict==1.1
-PyQt5==5.14.2
-wincertstore==0.2

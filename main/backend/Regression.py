@@ -125,8 +125,7 @@ class RegressionManager(PyQt5.QtCore.QObject):
             self._y = data_for_regression[dependent_variables['Variables'].values[0]]
 
             self._model = sm.OLS(self._y, self._X).fit()
-            results_as_html = self._model.summary().as_text()
-            self.summary = results_as_html
+            self.summary = self._model.summary().as_text()
             data_for_regression = None
 
     @PyQt5.QtCore.pyqtSlot('QString')

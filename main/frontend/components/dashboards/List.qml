@@ -1,7 +1,6 @@
 import QtQml 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.14
-
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.0
 import QtQml.Models 2.14
@@ -36,9 +35,7 @@ TableView {
         x: tableView.contentX
         width: tableView.leftMargin
         height: tableView.topMargin
-
         Row {
-
             Column {
                 Label {
                     width: 100
@@ -48,11 +45,9 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
-
                     background: Rectangle { color: "#333333" }
                 }
             }
-
             Column {
                 Label {
                     width: 100
@@ -62,11 +57,9 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
-
                     background: Rectangle { color: "#333333" }
                 }
             }
-
             Column {
                 Label {
                     width: 100
@@ -76,11 +69,9 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
-
                     background: Rectangle { color: "#333333" }
                 }
             }
-
             Column {
                 Label {
                     width: 100
@@ -90,13 +81,11 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
-
                     background: Rectangle { color: "#333333" }
                 }
             }
         }
     }
-
     Row {
         id: columnsHeader
         y: tableView.contentY
@@ -111,7 +100,6 @@ TableView {
                 font.pixelSize: 15
                 padding: 10
                 verticalAlignment: Text.AlignVCenter
-
                 background: Rectangle { color: "#333333" }
             }
         }
@@ -130,7 +118,6 @@ TableView {
                 font.pixelSize: 15
                 padding: 10
                 verticalAlignment: Text.AlignVCenter
-
                 background: Rectangle { color: "#333333" }
             }
         }
@@ -151,7 +138,6 @@ TableView {
                     onCheckedChanged: table_model.logarithm_check(modelData)
                 }
             }
-
         }
     }
     Column {
@@ -169,7 +155,6 @@ TableView {
                     onCheckedChanged: table_model.sqr_check(modelData)
                 }
             }
-
         }
     }
     Column {
@@ -188,11 +173,8 @@ TableView {
                     model: ["", "Dependent", "Independent"]
                 }
             }
-
         }
     }
-
-
     ScrollIndicator.horizontal: ScrollIndicator { }
     ScrollIndicator.vertical: ScrollIndicator { }
 }

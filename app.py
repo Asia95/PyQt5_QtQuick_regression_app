@@ -31,17 +31,8 @@ if __name__ == '__main__':
     app = PyQt5.QtWidgets.QApplication(sys.argv)
     engine = PyQt5.QtQml.QQmlApplicationEngine()
 
-    # backend = {
-    #     'regressionBridge': RegressionBridge()
-    # }
-    # for name in backend:
-    #     engine.rootContext().setContextProperty(name, backend[name])
-
-    df = pd.DataFrame()
-    model = DataFrameModel(df)
-    engine.rootContext().setContextProperty("table_model", model)
-    manager = RegressionManager()
-    engine.rootContext().setContextProperty("r_manager", manager)
+    engine.rootContext().setContextProperty("table_model", DataFrameModel())
+    engine.rootContext().setContextProperty("r_manager", RegressionManager())
     # engine.load(PyQt5.QtCore.QUrl('qrc:/main/frontend/main.qml'))
     engine.load('./main/frontend/main.qml')
 

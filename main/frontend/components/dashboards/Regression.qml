@@ -7,7 +7,7 @@ import QtQml.Models 2.2
 
 import '..'
 
-Page {
+SplitView {
     name: 'Regression'
     Rectangle {
         color: "#303030"
@@ -79,10 +79,8 @@ Page {
                     columns: 1
                     Text {
                          id: resultText
-
                          text: r_manager.summary
                     }
-
                 }
             }
         }
