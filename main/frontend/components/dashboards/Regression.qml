@@ -48,6 +48,20 @@ SplitView {
                             r_manager.run_regression()
                         }
                     }
+                    CheckBox {
+                        id: sesonalityMonthCheckbox
+                        text: qsTr("Include monthly sesonality")
+                        onCheckedChanged: () => {
+                            r_manager.sesonality_month = sesonalityMonthCheckbox.checkState
+                        }
+                    }
+                    CheckBox {
+                        id: sesonalityYearCheckbox
+                        text: qsTr("Include yearly sesonality")
+                        onCheckedChanged: () => {
+                            r_manager.sesonality_year = sesonalityYearCheckbox.checkState
+                        }
+                    }
                 }
             }
             GroupBox {
@@ -77,9 +91,16 @@ SplitView {
                 GridLayout {
                     anchors.fill: parent
                     columns: 1
-                    Text {
-                         id: resultText
-                         text: r_manager.summary
+                    ScrollView {
+                        id: view
+                        anchors.fill: parent
+                        TextArea {
+                             id: resultText
+                             anchors.fill: parent
+                             readOnly: true
+                             color: '#aaaaaa'
+                             text: r_manager.summary
+                        }
                     }
                 }
             }

@@ -5,7 +5,6 @@ import '..'
 
 TableView {
         id: tableView
-
         columnWidthProvider: function (column) { return 100; }
         rowHeightProvider: function (column) { return 60; }
         anchors.fill: parent
@@ -18,7 +17,7 @@ TableView {
                 anchors.fill: parent
                 anchors.margins: 10
                 color: '#aaaaaa'
-                font.pixelSize: 15
+                font.pixelSize: 18
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
             }
@@ -95,7 +94,7 @@ TableView {
                 Label {
                     width: tableView.columnWidthProvider(modelData)
                     height: 35
-                    text: table_model.headerData(modelData, Qt.Horizontal)
+                    text: 'Variables'
                     color: '#aaaaaa'
                     font.pixelSize: 15
                     padding: 10

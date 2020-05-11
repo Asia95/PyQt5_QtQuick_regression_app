@@ -9,7 +9,6 @@ from sklearn.linear_model import LinearRegression
 import qml_rc
 from main.backend import RegressionManager, DataFrameModel
 
-
 def qt_message_handler(mode, context, message):
     if mode == PyQt5.QtCore.QtInfoMsg:
         mode = 'Info'

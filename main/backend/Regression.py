@@ -7,15 +7,18 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 import PyQt5.QtCore
 
 class RegressionManager(PyQt5.QtCore.QObject):
-    coeffChanged = PyQt5.QtCore.pyqtSignal(float)
     filePathChanged = PyQt5.QtCore.pyqtSignal(str)
     summaryChanged = PyQt5.QtCore.pyqtSignal(str)
     dfChanged = PyQt5.QtCore.pyqtSignal(str)
+    sesonalityMonthChanged = PyQt5.QtCore.pyqtSignal(bool)
+    sesonalityYearChanged = PyQt5.QtCore.pyqtSignal(bool)
+
+    MONTHS = ['February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November',
+              'December']
 
     def __init__(self, parent=None):
         super(RegressionManager, self).__init__(parent)
         self._file_path = ''
-        self._coeff = 0.0
         self._data = None
         self._summary = None
         self._model = None
@@ -23,16 +26,28 @@ class RegressionManager(PyQt5.QtCore.QObject):
         self._y = None
         self._columns = None
         self._df = None
+        self._sesonality_month = False
+        self._sesonality_year = False
 
-    @PyQt5.QtCore.pyqtProperty(float, notify=coeffChanged)
-    def coeff(self):
-        return self._coeff
+    @PyQt5.QtCore.pyqtProperty(int, notify=sesonalityMonthChanged)
+    def sesonality_month(self):
+        return self._sesonality_month
 
-    @coeff.setter
-    def coeff(self, c):
-        if self._coeff != c:
-            self._coeff = c
-            self.coeffChanged.emit(c)
+    @sesonality_month.setter
+    def sesonality_month(self, c):
+        # 2 for checked, 0 for unchecked
+        self._sesonality_month = True if c == 2 else False
+        self.sesonalityMonthChanged.emit(self._sesonality_year)
+
+    @PyQt5.QtCore.pyqtProperty(int, notify=sesonalityYearChanged)
+    def sesonality_year(self):
+        return self._sesonality_year
+
+    @sesonality_year.setter
+    def sesonality_year(self, c):
+        # 2 for checked, 0 for unchecked
+        self._sesonality_year = True if c == 2 else False
+        self.sesonalityYearChanged.emit(self._sesonality_year)
 
     @PyQt5.QtCore.pyqtProperty(float, notify=filePathChanged)
     def file_path(self):
@@ -94,6 +109,22 @@ class RegressionManager(PyQt5.QtCore.QObject):
         if any(x in log_var for x in sqr_var):
             return 'Variables cannot have two effects applied'
 
+    def add_monthly_sesonality(self, data_for_regression):
+        for i, m in enumerate(self.MONTHS, start=2):
+            data_for_regression[m] = 0
+            data_for_regression.loc[data_for_regression.index.month == i, m] = 1
+        return data_for_regression
+
+    def add_yearly_sesonality(self, data_for_regression):
+        start_year = data_for_regression.index.min().year
+        end_year = data_for_regression.index.max().year
+        years = []
+        for y in range(start_year, end_year+1):
+            data_for_regression[y] = 0
+            data_for_regression.loc[data_for_regression.index.year == y, y] = 1
+            years.append(y)
+        return years, data_for_regression
+
     @PyQt5.QtCore.pyqtSlot()
     def run_regression(self):
         dependent_variables = self._df[self._df['role'] == 'Dependent']
@@ -105,6 +136,14 @@ class RegressionManager(PyQt5.QtCore.QObject):
             data_for_regression = self._data.copy()
             log_var = []
             sqr_var = []
+            independent_variables_columns = []
+
+            if self._sesonality_month:
+                data_for_regression = self.add_monthly_sesonality(data_for_regression)
+                independent_variables_columns.extend(self.MONTHS)
+            if self._sesonality_year:
+                years, data_for_regression = self.add_yearly_sesonality(data_for_regression)
+                independent_variables_columns.extend(years)
 
             if not independent_variables[independent_variables.logarithm].empty:
                 log_var = independent_variables[independent_variables.logarithm]['Variables'].values
@@ -116,7 +155,8 @@ class RegressionManager(PyQt5.QtCore.QObject):
                 sqr_var = independent_variables[independent_variables.sqr]['Variables'].values
                 data_for_regression[sqr_var] = np.square(data_for_regression[sqr_var])
 
-            self._X = data_for_regression[independent_variables['Variables'].values]
+            independent_variables_columns.extend(independent_variables['Variables'].tolist())
+            self._X = data_for_regression[independent_variables_columns]
             for x in log_var:
                 self._X.rename(columns={x: f'log({x})'}, inplace=True)
             for x in sqr_var:
@@ -132,6 +172,10 @@ class RegressionManager(PyQt5.QtCore.QObject):
     def load_data(self, fp):
         self.file_path = fp
         self._data = pd.read_csv(self._file_path)
+        first_column = self._data.columns[0]
+        self._data[first_column] = pd.to_datetime(self._data[first_column])
+        self._data.set_index(first_column, inplace=True)
+
         #self.columns = list(self._data.columns.values)
         #self._X = pd.DataFrame(self._data['x'])
         #self._X = sm.add_constant(self._X)
