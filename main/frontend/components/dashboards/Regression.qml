@@ -8,7 +8,7 @@ import QtQml.Models 2.2
 import '..'
 
 SplitView {
-    name: 'Regression'
+    property string name: 'Regression'
     Rectangle {
         color: "#303030"
         SplitView.fillWidth: true
