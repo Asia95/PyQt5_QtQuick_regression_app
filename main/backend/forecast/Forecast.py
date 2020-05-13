@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 import PyQt5.QtCore
+from PyQt5.QtCore import QAbstractTableModel, Qt
 
-class RegressionManager(PyQt5.QtCore.QObject):
+
+class ForecastManager(PyQt5.QtCore.QObject):
     filePathChanged = PyQt5.QtCore.pyqtSignal(str)
-    summaryChanged = PyQt5.QtCore.pyqtSignal(str)
-    dfChanged = PyQt5.QtCore.pyqtSignal(str)
+    summaryChanged = PyQt5.QtCore.pyqtSignal(QAbstractTableModel)
     sesonalityMonthChanged = PyQt5.QtCore.pyqtSignal(bool)
     sesonalityYearChanged = PyQt5.QtCore.pyqtSignal(bool)
 
@@ -17,7 +18,7 @@ class RegressionManager(PyQt5.QtCore.QObject):
               'December']
 
     def __init__(self, parent=None):
-        super(RegressionManager, self).__init__(parent)
+        super(ForecastManager, self).__init__(parent)
         self._file_path = ''
         self._data = None
         self._summary = None
@@ -59,25 +60,14 @@ class RegressionManager(PyQt5.QtCore.QObject):
             self._file_path = f
             self.filePathChanged.emit(f)
 
-    @PyQt5.QtCore.pyqtProperty(str, notify=summaryChanged)
+    @PyQt5.QtCore.pyqtProperty(QAbstractTableModel, notify=summaryChanged)
     def summary(self):
         return self._summary
 
     @summary.setter
     def summary(self, s):
-        if self._summary != s:
-            self._summary = s
-            self.summaryChanged.emit(s)
-
-    @PyQt5.QtCore.pyqtProperty(str, notify=dfChanged)
-    def df(self):
-        return self._df
-
-    @df.setter
-    def df(self, c):
-        if self._df != c:
-            self._df = c
-            self.dfChanged.emit(c)
+        self._summary = s
+        self.summaryChanged.emit(s)
 
     @PyQt5.QtCore.pyqtSlot('QString')
     def get_df(self, df_csv):
@@ -129,6 +119,7 @@ class RegressionManager(PyQt5.QtCore.QObject):
     def run_regression(self):
         dependent_variables = self._df[self._df['role'] == 'Dependent']
         independent_variables = self._df[self._df['role'] == 'Independent']
+        print(independent_variables)
 
         msg = self.check_regression_settings(dependent_variables, independent_variables)
 
@@ -159,10 +150,9 @@ class RegressionManager(PyQt5.QtCore.QObject):
                 sqr_var = independent_variables[independent_variables.sqr]['Variables'].values
                 data_for_regression[sqr_var] = np.square(data_for_regression[sqr_var])
 
-            print(data_for_regression.head(10))
-
             independent_variables_columns.extend(independent_variables['Variables'].tolist())
             self._X = data_for_regression[independent_variables_columns]
+            print(self._X.head(10))
             for x in log_var:
                 self._X.rename(columns={x: f'log({x})'}, inplace=True)
             for x in sqr_var:
@@ -171,42 +161,51 @@ class RegressionManager(PyQt5.QtCore.QObject):
             self._y = data_for_regression[dependent_variables['Variables'].values[0]]
 
             self._model = sm.OLS(self._y, self._X).fit()
-            self.summary = self._model.summary().as_text()
+            #self.summary = self._model.summary().tables[1].as_text()
+            self.summary = pandasModel(self._model.summary2().tables[1].round(4))
             data_for_regression = None
 
     @PyQt5.QtCore.pyqtSlot('QString')
     def load_data(self, fp):
         self.file_path = fp
-        self._data = pd.read_csv(self._file_path)
-        first_column = self._data.columns[0]
-        self._data[first_column] = pd.to_datetime(self._data[first_column])
-        self._data.set_index(first_column, inplace=True)
+        self._data = pd.read_excel(self._file_path, index_col=0)
 
-        #self.columns = list(self._data.columns.values)
-        #self._X = pd.DataFrame(self._data['x'])
-        #self._X = sm.add_constant(self._X)
-        #self._y = pd.DataFrame(self._data['y'])
-        #model = LinearRegression().fit(X, y)
-        #self._model = sm.OLS(self._y, self._X).fit()
-        #results_as_html = self._model.summary().as_text()
-        #results_as_html = results_as_html.replace("<table class=\"simpletable\">", "<table border = '1'>")
-        #print(results_as_html)
-        #self.summary = results_as_html
-        #print(self._summary)
-        #self.summary = self._model.summary()
-        #self.coeff = model.intercept_[0]
+class pandasModel(QAbstractTableModel):
 
-    @PyQt5.QtCore.pyqtSlot()
-    def predictions_plot(self):
-        prstd, iv_l, iv_u = wls_prediction_std(self._model)
+    def __init__(self, data):
+        QAbstractTableModel.__init__(self)
+        self.beginResetModel()
+        self._data = data
+        self.endResetModel()
 
-        fig, ax = plt.subplots(figsize=(8, 6))
+    def setDataFrame(self, dataframe):
+        self.beginResetModel()
+        self._data = dataframe.copy()
+        self.endResetModel()
 
-        ax.plot(self._X, self._y, 'o', label="data")
-        ax.plot(self._X, self._y, 'b-', label="True")
-        ax.plot(self._X, self._model.fittedvalues, 'r--.', label="OLS")
-        ax.plot(self._X, iv_u, 'r--')
-        ax.plot(self._X, iv_l, 'r--')
-        ax.legend(loc='best')
-        fig.show()
+    def dataFrame(self):
+        return self._data
 
+    dataFrame = PyQt5.QtCore.pyqtProperty(pd.DataFrame, fget=dataFrame, fset=setDataFrame)
+
+    def rowCount(self, parent=None):
+        return self._data.shape[0]
+
+    def columnCount(self, parnet=None):
+        return self._data.shape[1]
+
+    def data(self, index, role=Qt.DisplayRole):
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                return str(self._data.iloc[index.row(), index.column()])
+        return None
+
+    @PyQt5.QtCore.pyqtSlot(int, Qt.Orientation, result=str)
+    def headerData(self, col, orientation, role: int = Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._data.columns[col]
+            else:
+                if len(self._data.index) > col:
+                    return str(self._data.index[col])
+        return None

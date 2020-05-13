@@ -5,12 +5,13 @@ import '..'
 
 TableView {
         id: tableView
+        clip: true
         columnWidthProvider: function (column) { return 100; }
         rowHeightProvider: function (column) { return 60; }
         anchors.fill: parent
-        leftMargin: rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth
+        leftMargin: rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth + interchangeCombobox.implicitWidth
         topMargin: columnsHeader.implicitHeight
-        model: table_model
+        model: reg_table_model
         delegate: Item {
             Text {
                 text: display
@@ -82,6 +83,19 @@ TableView {
                         background: Rectangle { color: "#333333" }
                     }
                 }
+                Column {
+                    Label {
+                        width: 100
+                        height: tableView.rowHeightProvider(modelData)
+                        text: 'Interchange'
+                        color: '#aaaaaa'
+                        font.pixelSize: 15
+                        padding: 10
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        background: Rectangle { color: "#333333" }
+                    }
+                }
             }
         }
 
@@ -114,7 +128,7 @@ TableView {
                 Label {
                     width: 40
                     height: tableView.rowHeightProvider(modelData)
-                    text: table_model.headerData(modelData, Qt.Vertical)
+                    text: reg_table_model.headerData(modelData, Qt.Vertical)
                     color: '#aaaaaa'
                     font.pixelSize: 15
                     padding: 10
@@ -137,7 +151,7 @@ TableView {
                     CheckBox {
                         id: check
                         anchors.centerIn: parent
-                        onCheckedChanged: table_model.logarithm_check(modelData)
+                        onCheckedChanged: reg_table_model.logarithm_check(modelData)
                     }
                 }
             }
@@ -155,7 +169,7 @@ TableView {
                     CheckBox {
                         id: check
                         anchors.centerIn: parent
-                        onCheckedChanged: table_model.sqr_check(modelData)
+                        onCheckedChanged: reg_table_model.sqr_check(modelData)
                     }
                 }
             }
@@ -173,8 +187,27 @@ TableView {
                     ComboBox {
                         width: 90
                         anchors.centerIn: parent
-                        onActivated: table_model.variable_check(modelData, currentValue)
+                        onActivated: reg_table_model.variable_check(modelData, currentValue)
                         model: ["", "Dependent", "Independent"]
+                    }
+                }
+            }
+        }
+        Column {
+            id: interchangeCombobox
+            x: tableView.contentX + rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth
+            z: 0
+            Repeater {
+                model: tableView.rows > 0 ? tableView.rows : 1
+                Rectangle {
+                    color: "#333333"
+                    width: 100
+                    height: tableView.rowHeightProvider(modelData)
+                    ComboBox {
+                        width: 90
+                        anchors.centerIn: parent
+                        onActivated: reg_table_model.variable_interchange_check(modelData, currentValue)
+                        model: reg_table_model.get_variables()
                     }
                 }
             }

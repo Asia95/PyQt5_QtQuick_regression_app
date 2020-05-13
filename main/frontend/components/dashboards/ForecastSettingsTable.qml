@@ -1,31 +1,32 @@
-import QtQml 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.0
-import QtQml.Models 2.14
-import Qt.labs.qmlmodels 1.0
 
 import '..'
 
-
 TableView {
     id: tableView
-
+    clip: true
     columnWidthProvider: function (column) { return 100; }
-    rowHeightProvider: function (column) { return 40; }
-    leftMargin: rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth
+    rowHeightProvider: function (column) { return 70; }
+    anchors.fill: parent
+    leftMargin: rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth + interchangeCombobox.implicitWidth
     topMargin: columnsHeader.implicitHeight
-    model: table_model
-    delegate: Item {
+    model: forecast_table_model
+    delegate: Rectangle {
+        color: "#333333"
+        border.color: "#222222"
+        border.width: 1
         Text {
             text: display
+            wrapMode: Text.Wrap
+            width: parent.width
             anchors.fill: parent
             anchors.margins: 10
-
             color: '#aaaaaa'
-            font.pixelSize: 15
+            font.pixelSize: 18
             verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignLeft
         }
     }
     Rectangle { // mask the headers
@@ -38,13 +39,14 @@ TableView {
         Row {
             Column {
                 Label {
-                    width: 100
+                    width: 40
                     height: tableView.rowHeightProvider(modelData)
                     text: ''
                     color: '#aaaaaa'
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     background: Rectangle { color: "#333333" }
                 }
             }
@@ -57,6 +59,7 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     background: Rectangle { color: "#333333" }
                 }
             }
@@ -69,6 +72,7 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     background: Rectangle { color: "#333333" }
                 }
             }
@@ -81,11 +85,26 @@ TableView {
                     font.pixelSize: 15
                     padding: 10
                     verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    background: Rectangle { color: "#333333" }
+                }
+            }
+            Column {
+                Label {
+                    width: 100
+                    height: tableView.rowHeightProvider(modelData)
+                    text: 'Interchange'
+                    color: '#aaaaaa'
+                    font.pixelSize: 15
+                    padding: 10
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     background: Rectangle { color: "#333333" }
                 }
             }
         }
     }
+
     Row {
         id: columnsHeader
         y: tableView.contentY
@@ -95,11 +114,13 @@ TableView {
             Label {
                 width: tableView.columnWidthProvider(modelData)
                 height: 35
-                text: table_model.headerData(modelData, Qt.Horizontal)
+                text: 'Variables'
                 color: '#aaaaaa'
                 font.pixelSize: 15
                 padding: 10
                 verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+
                 background: Rectangle { color: "#333333" }
             }
         }
@@ -111,13 +132,14 @@ TableView {
         Repeater {
             model: tableView.rows > 0 ? tableView.rows : 1
             Label {
-                width: 100
+                width: 40
                 height: tableView.rowHeightProvider(modelData)
-                text: table_model.headerData(modelData, Qt.Vertical)
+                text: forecast_table_model.headerData(modelData, Qt.Vertical)
                 color: '#aaaaaa'
                 font.pixelSize: 15
                 padding: 10
                 verticalAlignment: Text.AlignVCenter
+
                 background: Rectangle { color: "#333333" }
             }
         }
@@ -134,7 +156,8 @@ TableView {
                 height: tableView.rowHeightProvider(modelData)
                 CheckBox {
                     id: check
-                    onCheckedChanged: table_model.logarithm_check(modelData)
+                    anchors.centerIn: parent
+                    onCheckedChanged: forecast_table_model.logarithm_check(modelData)
                 }
             }
         }
@@ -151,7 +174,8 @@ TableView {
                 height: tableView.rowHeightProvider(modelData)
                 CheckBox {
                     id: check
-                    onCheckedChanged: table_model.sqr_check(modelData)
+                    anchors.centerIn: parent
+                    onCheckedChanged: forecast_table_model.sqr_check(modelData)
                 }
             }
         }
@@ -168,12 +192,34 @@ TableView {
                 height: tableView.rowHeightProvider(modelData)
                 ComboBox {
                     width: 90
-                    onActivated: table_model.variable_check(modelData, currentValue)
+                    anchors.centerIn: parent
+                    onActivated: forecast_table_model.variable_check(modelData, currentValue)
                     model: ["", "Dependent", "Independent"]
+                    currentIndex: index == 0 ? 1 : 2
                 }
             }
         }
     }
+    Column {
+        id: interchangeCombobox
+        x: tableView.contentX + rowsHeader.implicitWidth + logarithmCheckbox.implicitWidth + sqrCheckbox.implicitWidth + variableCombobox.implicitWidth
+        z: 0
+        Repeater {
+            model: tableView.rows > 0 ? tableView.rows : 1
+            Rectangle {
+                color: "#333333"
+                width: 100
+                height: tableView.rowHeightProvider(modelData)
+                ComboBox {
+                    width: 90
+                    anchors.centerIn: parent
+                    onActivated: forecast_table_model.variable_interchange_check(modelData, currentValue)
+                    model: forecast_table_model.get_variables()
+                }
+            }
+        }
+    }
+
     ScrollIndicator.horizontal: ScrollIndicator { }
     ScrollIndicator.vertical: ScrollIndicator { }
 }

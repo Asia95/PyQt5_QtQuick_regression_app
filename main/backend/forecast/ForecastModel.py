@@ -2,12 +2,12 @@ from PyQt5 import QtCore, QtGui, QtQml
 import numpy as np
 import pandas as pd
 
-class DataFrameModel(QtCore.QAbstractTableModel):
+class ForecastModel(QtCore.QAbstractTableModel):
     DtypeRole = QtCore.Qt.UserRole + 1000
     ValueRole = QtCore.Qt.UserRole + 1001
 
     def __init__(self, df=pd.DataFrame(), parent=None):
-        super(DataFrameModel, self).__init__(parent)
+        super(ForecastModel, self).__init__(parent)
         self._dataframe = pd.DataFrame({'': ['']})
 
     def setDataFrame(self, dataframe):
@@ -59,11 +59,12 @@ class DataFrameModel(QtCore.QAbstractTableModel):
 
     @QtCore.pyqtSlot(str)
     def load_data(self, fp):
-        df = pd.read_csv(fp, index_col=0)
+        df = pd.read_excel(fp, index_col=0)
         df = pd.DataFrame(data=df.columns.values, columns=['Variables'])
         df['logarithm'] = False
         df['sqr'] = False
-        df['role'] = ''
+        df['role'] = 'Independent'
+        df.at[0, 'role'] = 'Dependent'
         df['interchange'] = ''
         self.setDataFrame(df)
 
@@ -100,16 +101,16 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         val = self._dataframe.iloc[row][col]
         if role == QtCore.Qt.DisplayRole:
             return str(val)
-        elif role == DataFrameModel.ValueRole:
+        elif role == ForecastModel.ValueRole:
             return val
-        if role == DataFrameModel.DtypeRole:
+        if role == ForecastModel.DtypeRole:
             return dt
         return QtCore.QVariant()
 
     def roleNames(self):
         roles = {
             QtCore.Qt.DisplayRole: b'display',
-            DataFrameModel.DtypeRole: b'dtype',
-            DataFrameModel.ValueRole: b'value'
+            ForecastModel.DtypeRole: b'dtype',
+            ForecastModel.ValueRole: b'value'
         }
         return roles

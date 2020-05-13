@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import qml_rc
-from main.backend import RegressionManager, DataFrameModel
+from main.backend import ForecastModel, ForecastManager, RegressionManager, DataFrameModel
 
 def qt_message_handler(mode, context, message):
     if mode == PyQt5.QtCore.QtInfoMsg:
@@ -30,10 +30,15 @@ if __name__ == '__main__':
     app = PyQt5.QtWidgets.QApplication(sys.argv)
     engine = PyQt5.QtQml.QQmlApplicationEngine()
 
-    model = DataFrameModel()
-    engine.rootContext().setContextProperty("table_model", model)
-    manager = RegressionManager()
-    engine.rootContext().setContextProperty("r_manager", manager)
+    properties = {
+        "reg_table_model": DataFrameModel(),
+        "r_manager": RegressionManager(),
+        "forecast_table_model": ForecastModel(),
+        "f_manager": ForecastManager()
+    }
+    for name in properties:
+        engine.rootContext().setContextProperty(name, properties[name])
+
     # engine.load(PyQt5.QtCore.QUrl('qrc:/main/frontend/main.qml'))
     engine.load('./main/frontend/main.qml')
 

@@ -33,7 +33,7 @@ SplitView {
                         folder: shortcuts.home
                         onAccepted: () => {
                             r_manager.load_data(fileDialog.fileUrl)
-                            table_model.load_data(fileDialog.fileUrl)
+                            reg_table_model.load_data(fileDialog.fileUrl)
                             fileDialog.close()
                         }
                         onRejected: {
@@ -44,7 +44,7 @@ SplitView {
                     Button {
                         text: "Run Regression"
                         onClicked: () => {
-                            r_manager.get_df(table_model.get_data())
+                            r_manager.get_df(reg_table_model.get_data())
                             r_manager.run_regression()
                         }
                     }
@@ -71,7 +71,7 @@ SplitView {
                 Layout.fillHeight: true
                 RowLayout {
                     anchors.fill: parent
-                    List {}
+                    RegressionSettingsTable {}
                 }
             }
         }
