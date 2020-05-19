@@ -21,6 +21,7 @@ ApplicationWindow {
         NoteBook {
             Regression {}
             Forecast {}
+            Options {}
         }
     }
 }

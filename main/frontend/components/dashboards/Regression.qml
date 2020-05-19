@@ -90,7 +90,7 @@ SplitView {
                 Layout.fillHeight: true
                 GridLayout {
                     anchors.fill: parent
-                    columns: 1
+                    columns: 2
                     ScrollView {
                         id: view
                         anchors.fill: parent

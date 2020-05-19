@@ -25,7 +25,6 @@ class ForecastModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             df_first_column = self._dataframe.iloc[:, [0]]
             if orientation == QtCore.Qt.Horizontal:
-                print(self._dataframe.columns[section])
                 return df_first_column.columns[section]
             else:
                 return str(self._dataframe.index[section])

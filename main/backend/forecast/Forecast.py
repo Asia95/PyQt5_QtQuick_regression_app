@@ -119,12 +119,12 @@ class ForecastManager(PyQt5.QtCore.QObject):
     def run_regression(self):
         dependent_variables = self._df[self._df['role'] == 'Dependent']
         independent_variables = self._df[self._df['role'] == 'Independent']
-        print(independent_variables)
 
         msg = self.check_regression_settings(dependent_variables, independent_variables)
 
         if not msg:
             data_for_regression = self._data.copy()
+            data_for_regression = data_for_regression.dropna()
             log_var = []
             sqr_var = []
             independent_variables_columns = []
