@@ -1,7 +1,6 @@
 import sys
 from matplotlib_backend_qtquick.qt_compat import QtQml, QtCore
 
-
 class DisplayBridge(QtCore.QObject):
     heightChanged = QtCore.Signal(float)
 
